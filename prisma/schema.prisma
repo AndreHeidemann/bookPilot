@@ -1,0 +1,143 @@
+// Prisma schema for BookPilot
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  MEMBER
+}
+
+enum BookingStatus {
+  PENDING_PAYMENT
+  CONFIRMED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  CANCELED
+}
+
+model Team {
+  id        String              @id @default(cuid())
+  slug      String              @unique
+  name      String
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+
+  users               User[]
+  availabilityBlocks  AvailabilityBlock[]
+  bookings            Booking[]
+  auditLogs           AuditLog[]
+}
+
+model User {
+  id           String    @id @default(cuid())
+  teamId       String
+  email        String    @unique
+  passwordHash String
+  role         UserRole  @default(MEMBER)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  team      Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  auditLogs AuditLog[]
+}
+
+model AvailabilityBlock {
+  id        String   @id @default(cuid())
+  teamId    String
+  dayOfWeek Int
+  startTime String
+  endTime   String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@index([teamId, dayOfWeek])
+}
+
+model Booking {
+  id                     String        @id @default(cuid())
+  teamId                 String
+  customerName           String
+  customerEmailEncrypted String
+  emailIv                String
+  customerPhoneEncrypted String
+  phoneIv                String
+  startAt                DateTime
+  endAt                  DateTime
+  status                 BookingStatus @default(PENDING_PAYMENT)
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
+  cancelledAt            DateTime?
+  confirmedAt            DateTime?
+
+  team     Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  payment  Payment?
+  calendar CalendarLink?
+  audits   AuditLog[]
+
+  @@index([teamId, startAt])
+  @@index([status])
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  bookingId       String        @unique
+  stripeSessionId String        @unique
+  amountCents     Int
+  status          PaymentStatus @default(PENDING)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+}
+
+model CalendarLink {
+  id               String   @id @default(cuid())
+  bookingId        String   @unique
+  provider         String
+  externalEventId  String
+  externalHtmlLink String?
+  createdAt        DateTime @default(now())
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+}
+
+model IdempotencyKey {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  handler     String
+  requestHash String
+  response    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  teamId      String
+  actorUserId String?
+  bookingId   String?
+  action      String
+  details     Json?
+  createdAt   DateTime @default(now())
+
+  team  Team  @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  actor User? @relation(fields: [actorUserId], references: [id])
+  booking Booking? @relation(fields: [bookingId], references: [id])
+
+  @@index([teamId])
+  @@index([bookingId])
+}
