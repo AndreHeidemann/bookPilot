@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BookPilot
 
-## Getting Started
+BookPilot is a demo-friendly appointment booking tool for teams. Ops users manage availability and bookings, while guests can reserve slots from a shareable public page that syncs to Google Calendar after Stripe deposits clear.
 
-First, run the development server:
+## Features
+
+- Email/password auth with role-aware navigation across dashboard, bookings, availability, and audit log views.
+- Weekly availability editor with drag-free block management that powers the public booking page.
+- Booking workflow: pick slot → enter details → reserve → Stripe Checkout session (mock friendly) → webhook-driven confirmation + Google Calendar event creation.
+- RBAC enforcement (Admin/Manager/Member) for mutations, with audit log trail and idempotent checkout session creation.
+- Encrypted customer email/phone at rest plus conflict detection + pending-payment auto expiry.
+
+## Getting started
 
 ```bash
+npm install
+npm run db:migrate
+npm run db:seed
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open http://localhost:3000. Use the seeded credentials `admin@bookpilot.test` / `password123` to access the ops surface, or visit `/book/demo-team` for the public flow.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Environment variables live in `.env` (see `.env.example`). At minimum set `SESSION_PASSWORD` (32+ chars) and `ENCRYPTION_KEY` (32-byte base64). Optional integrations:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, `STRIPE_WEBHOOK_SECRET`
+- `GOOGLE_SERVICE_ACCOUNT_EMAIL`, `GOOGLE_PRIVATE_KEY`, `GOOGLE_CALENDAR_ID`
 
-## Learn More
+## Tests & linting
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run lint
+npm run test
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Vitest covers critical helpers (time utils today) and can be extended for server logic.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project structure
 
-## Deploy on Vercel
+```
+src/
+  app/
+    (public)/login, book/[teamSlug]
+    (app)/app/... (dashboard, bookings, availability, audit)
+  components/
+  lib/ (config, session, crypto helpers)
+  server/ (auth, bookings, availability, payments, integrations)
+api/ routes live within `src/app/api/*` following the spec (auth, availability, bookings, billing, webhooks, audit).
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Notes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Stripe + Google Calendar integrations gracefully degrade when env vars are missing (mock URLs + stub event ids) so you can demo without live keys.
+- SQLite is powered by Prisma's better-sqlite3 adapter for fast local development.
+# bookPilot
