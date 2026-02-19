@@ -10,6 +10,7 @@ import { getBookingAuditTrail } from "@/server/audit/service";
 import { AppError } from "@/lib/errors";
 
 type BookingAuditLogs = Awaited<ReturnType<typeof getBookingAuditTrail>>;
+type BookingAuditLog = BookingAuditLogs[number];
 
 const BookingDetailPage = async ({ params }: { params: { id: string } }) => {
   const user = await getCurrentUserOrRedirect();
@@ -46,7 +47,7 @@ const BookingDetailPage = async ({ params }: { params: { id: string } }) => {
             <div className="space-y-2 text-sm text-slate-600">
               {logs.length === 0
                 ? "No activity yet."
-                : logs.map((log) => (
+                : logs.map((log: BookingAuditLog) => (
                     <div key={log.id}>
                       <p className="font-medium text-slate-900">{log.action}</p>
                       <p className="text-xs text-slate-500">{new Date(log.createdAt).toLocaleString()}</p>
