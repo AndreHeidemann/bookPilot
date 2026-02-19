@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { BookingStatus } from "@prisma/client";
+import type { BookingStatus } from "@prisma/client";
 
 import { StatusBadge } from "@/components/status-badge";
 import { Input } from "@/components/ui/input";

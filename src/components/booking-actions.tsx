@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BookingStatus } from "@prisma/client";
+import type { BookingStatus } from "@prisma/client";
 
 import { Button } from "@/components/ui/button";
 
