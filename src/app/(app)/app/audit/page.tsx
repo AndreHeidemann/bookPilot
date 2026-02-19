@@ -2,6 +2,8 @@ import { Card } from "@/components/ui/card";
 import { getCurrentUser } from "@/server/auth/service";
 import { getAuditLogs } from "@/server/audit/service";
 
+type AuditLogEntry = Awaited<ReturnType<typeof getAuditLogs>>[number];
+
 const AuditPage = async () => {
   const user = await getCurrentUser();
   const logs = await getAuditLogs(user.teamId, 25);
@@ -21,7 +23,7 @@ const AuditPage = async () => {
             </tr>
           </thead>
           <tbody>
-            {logs.map((log) => (
+            {logs.map((log: AuditLogEntry) => (
               <tr key={log.id} className="border-t border-slate-100">
                 <td className="px-4 py-3 font-medium text-slate-900">{log.action}</td>
                 <td className="px-4 py-3 text-slate-600">{log.actor?.email ?? "System"}</td>
