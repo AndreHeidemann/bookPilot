@@ -41,7 +41,7 @@ export const listTeamBookings = async (
     where.status = filters.status;
   }
   if (filters.query) {
-    where.customerName = { contains: filters.query, mode: "insensitive" };
+    where.customerName = { contains: filters.query };
   }
 
   const bookings = await prisma.booking.findMany({

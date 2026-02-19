@@ -9,11 +9,13 @@ import { getTeamBooking } from "@/server/bookings/service";
 import { getBookingAuditTrail } from "@/server/audit/service";
 import { AppError } from "@/lib/errors";
 
+type BookingAuditLogs = Awaited<ReturnType<typeof getBookingAuditTrail>>;
+
 const BookingDetailPage = async ({ params }: { params: { id: string } }) => {
   const user = await getCurrentUserOrRedirect();
   try {
     const booking = await getTeamBooking(user.teamId, params.id);
-    const logs = await getBookingAuditTrail(booking.id);
+    const logs: BookingAuditLogs = await getBookingAuditTrail(booking.id);
     return (
       <div className="grid gap-6 md:grid-cols-3">
         <div className="space-y-4 md:col-span-2">

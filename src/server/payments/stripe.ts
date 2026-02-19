@@ -2,6 +2,8 @@ import Stripe from "stripe";
 
 import { appConfig } from "@/lib/config";
 
+const STRIPE_API_VERSION = Stripe.API_VERSION as Stripe.StripeConfig["apiVersion"];
+
 let stripeClient: Stripe | null = null;
 
 const getStripe = () => {
@@ -10,7 +12,7 @@ const getStripe = () => {
   }
   if (!stripeClient) {
     stripeClient = new Stripe(appConfig.stripeSecretKey, {
-      apiVersion: "2024-06-20",
+      apiVersion: STRIPE_API_VERSION,
     });
   }
   return stripeClient;

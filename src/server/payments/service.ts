@@ -91,13 +91,10 @@ export const handleStripeWebhook = async (rawBody: Buffer, signature: string | n
         break;
       }
 
-      let confirmedBooking: { id: string; teamId: string; customerName: string; startAt: Date; endAt: Date } | null =
-        null;
-
-      await prisma.$transaction(async (tx) => {
+      const confirmedBooking = await prisma.$transaction(async (tx) => {
         const booking = await tx.booking.findUnique({ where: { id: session.client_reference_id } });
         if (!booking || booking.status !== BookingStatus.PENDING_PAYMENT || isPendingExpired(booking)) {
-          return;
+          return null;
         }
 
         await tx.payment.updateMany({
@@ -113,14 +110,6 @@ export const handleStripeWebhook = async (rawBody: Buffer, signature: string | n
           },
         });
 
-        confirmedBooking = {
-          id: updated.id,
-          teamId: updated.teamId,
-          customerName: updated.customerName,
-          startAt: updated.startAt,
-          endAt: updated.endAt,
-        };
-
         await logAudit(
           {
             teamId: booking.teamId,
@@ -129,6 +118,14 @@ export const handleStripeWebhook = async (rawBody: Buffer, signature: string | n
           },
           tx,
         );
+
+        return {
+          id: updated.id,
+          teamId: updated.teamId,
+          customerName: updated.customerName,
+          startAt: updated.startAt,
+          endAt: updated.endAt,
+        };
       });
 
       if (confirmedBooking) {
