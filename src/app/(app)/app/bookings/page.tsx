@@ -2,9 +2,11 @@ import { BookingsTable } from "@/components/bookings-table";
 import { getCurrentUserOrRedirect } from "@/server/auth/service";
 import { listTeamBookings } from "@/server/bookings/service";
 
+type BookingListItem = Awaited<ReturnType<typeof listTeamBookings>>[number];
+
 const BookingsPage = async () => {
   const user = await getCurrentUserOrRedirect();
-  const bookings = await listTeamBookings(user.teamId);
+  const bookings: BookingListItem[] = await listTeamBookings(user.teamId);
   return (
     <div className="space-y-4">
       <div>
@@ -12,7 +14,7 @@ const BookingsPage = async () => {
         <p className="text-sm text-slate-500">Filter by status or search by customer to manage appointments.</p>
       </div>
       <BookingsTable
-        initialBookings={bookings.map((booking) => ({
+        initialBookings={bookings.map((booking: BookingListItem) => ({
           id: booking.id,
           customerName: booking.customerName,
           customerEmail: booking.customerEmail,
