@@ -5,9 +5,11 @@ import { StatusBadge } from "@/components/status-badge";
 import { getCurrentUserOrRedirect } from "@/server/auth/service";
 import { listTeamBookings } from "@/server/bookings/service";
 
+type BookingListItem = Awaited<ReturnType<typeof listTeamBookings>>[number];
+
 const DashboardPage = async () => {
   const user = await getCurrentUserOrRedirect();
-  const bookings = await listTeamBookings(user.teamId);
+  const bookings: BookingListItem[] = await listTeamBookings(user.teamId);
   const today = bookings.filter((booking) => isSameDay(new Date(booking.startAt), new Date()));
   const upcoming = bookings.filter((booking) => isAfter(new Date(booking.startAt), new Date())).slice(0, 5);
   const confirmedCount = bookings.filter((b) => b.status === "CONFIRMED").length;
