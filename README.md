@@ -2,6 +2,40 @@
 
 BookPilot is a scheduling and payments cockpit for internal operations teams. It gives coordinators a dashboard to review bookings, edit weekly availability, audit changes, and share a branded `/book/[teamSlug]` link with guests. Guests can pick a slot, pay a deposit through Stripe, and the confirmed meeting is synced back to Google Calendar so everyone stays aligned. The entire experience lives in a single Next.js repository so portfolio reviewers can reason about the product, data model, and integration surface at a glance.
 
+## Try it on Vercel
+The fastest path is the hosted build: [https://book-pilot-cyan.vercel.app/login](https://book-pilot-cyan.vercel.app/login). You’ll land on the operator login; once authenticated you can review the bookings queue, availability editor, audit log, or open the public `/book/demo-team` flow from the dashboard.
+
+| Field | Value |
+| --- | --- |
+| Email | `admin@bookpilot.test` |
+| Password | `password123` |
+
+After logging in, explore the `/app` workspace, confirm/cancel bookings, or copy the published guest link to run through the Stripe deposit + webhook/polling confirmation path end to end.
+
+## Run locally (optional)
+```bash
+# clone and enter
+git clone <repo-url>
+cd bookpilot
+
+# install deps
+npm install
+
+# configure env
+cp .env.example .env
+# edit .env to set values for APP_BASE_URL, SESSION_PASSWORD, ENCRYPTION_KEY,
+# optional STRIPE_* and GOOGLE_* keys, etc.
+
+# start dev server
+npm run dev
+```
+Visit http://localhost:3000 and sign in with the same demo credentials.
+
+## Notes for reviewers
+- Validate the authenticated `/app` flows: bookings list/detail actions, availability editor, audit log.
+- From the dashboard, grab the `/book/[teamSlug]` link to simulate the guest flow plus Stripe checkout confirmation.
+- Check that paid bookings update the admin view and audit trail whether confirmed via webhook or the client-side fallback.
+
 ## Why reviewers care
 - **Purpose-built flows** – Authenticated `/app` workspace with a dashboard, bookings queue, weekly availability editor, and audit log, plus a public `/book/:teamSlug` guest flow.
 - **Modern stack** – Next.js 16 App Router, React 19 Server Components, Prisma 7 on SQLite via `better-sqlite3`, Tailwind 4, iron-session auth, and Stripe + Google Calendar integrations that gracefully fall back to demo mode when keys are missing.
