@@ -1,21 +1,15 @@
 import "dotenv/config";
 
-import path from "node:path";
-
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { PrismaClient, UserRole } from "@prisma/client";
 
 import { hashPassword } from "../src/lib/passwords";
+import { buildPrismaAdapter } from "../src/lib/prisma-adapter";
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {
   throw new Error("DATABASE_URL is required");
 }
-const rawPath = databaseUrl.startsWith("file:") ? databaseUrl.replace("file:", "") : databaseUrl;
-const filePath = rawPath.startsWith("/") ? rawPath : path.resolve(process.cwd(), rawPath);
-const adapter = new PrismaBetterSqlite3({ url: `file:${filePath}` });
-
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient({ adapter: buildPrismaAdapter() });
 
 async function main() {
   const team = await prisma.team.upsert({

@@ -89,7 +89,8 @@ GOOGLE_CALENDAR_ID=""
 | Variable | Required | Purpose |
 | --- | --- | --- |
 | `APP_BASE_URL` | ✅ | Canonical URL used in emails, webhooks, and redirect URLs.
-| `DATABASE_URL` | ✅ | Prisma connection string (SQLite via `file:./dev.db` for local use).
+| `DATABASE_URL` | ✅ | Prisma connection string (`file:./dev.db` locally, `libsql://...` when deploying).
+| `DATABASE_AUTH_TOKEN` | Optional | Auth token for remote libSQL/Turso deployments (not needed for local files).
 | `SESSION_PASSWORD` | ✅ | Iron-session cookie password (32+ characters).
 | `ENCRYPTION_KEY` | ✅ | Base64-encoded 32-byte key used to encrypt guest PII columns.
 | `DEPOSIT_AMOUNT_CENTS` | ✅ | Stripe checkout deposit amount in cents.
@@ -100,6 +101,13 @@ GOOGLE_CALENDAR_ID=""
 | `GOOGLE_SERVICE_ACCOUNT_EMAIL` | Optional | Service account identity for the Calendar API.
 | `GOOGLE_PRIVATE_KEY` | Optional | Private key for the service account (escaped newlines).
 | `GOOGLE_CALENDAR_ID` | Optional | Calendar that stores confirmed bookings.
+
+### Remote libSQL (Vercel) setup
+Vercel's serverless runtime can't write to bundled SQLite files, so production needs a remote libSQL database (Turso or any libSQL host).
+1. Provision a Turso/libSQL database and note its `libsql://...` URL plus auth token.
+2. Run Prisma migrations against it locally: `DATABASE_URL=<remote> DATABASE_AUTH_TOKEN=<token> npx prisma migrate deploy` (or `npm run db:migrate`).
+3. Seed demo data if desired with `npm run db:seed` while the same env vars are set.
+4. Configure the same `DATABASE_URL` and `DATABASE_AUTH_TOKEN` inside Vercel's Environment Variables so every serverless function uses the remote database.
 
 ---
 
