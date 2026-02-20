@@ -72,3 +72,11 @@ export const verifyStripeRequest = (rawBody: Buffer, signature: string | null) =
 
   return stripe.webhooks.constructEvent(rawBody, signature, appConfig.stripeWebhookSecret);
 };
+
+export const retrieveCheckoutSession = async (sessionId: string) => {
+  const stripe = getStripe();
+  if (!stripe) {
+    return null;
+  }
+  return stripe.checkout.sessions.retrieve(sessionId);
+};

@@ -12,7 +12,7 @@ const PublicBookingPage = async ({
   searchParams,
 }: {
   params: Promise<{ teamSlug: string }>;
-  searchParams?: Promise<{ status?: string }>;
+  searchParams?: Promise<{ status?: string; session_id?: string }>;
 }) => {
   const resolvedParams = await params;
   const resolvedSearchParams = searchParams ? await searchParams : {};
@@ -22,6 +22,10 @@ const PublicBookingPage = async ({
       : resolvedSearchParams.status === "cancelled"
         ? "cancelled"
         : undefined;
+  const normalizedSessionId =
+    typeof resolvedSearchParams.session_id === "string" && resolvedSearchParams.session_id.length > 0
+      ? resolvedSearchParams.session_id
+      : undefined;
   let team;
   let days;
   try {
@@ -37,7 +41,13 @@ const PublicBookingPage = async ({
   return (
     <div className="min-h-screen bg-white px-4 py-10">
       <div className="mx-auto max-w-3xl space-y-6">
-        <PublicBooking teamName={team.name} teamSlug={team.slug} days={days} initialStatus={normalizedStatus} />
+        <PublicBooking
+          teamName={team.name}
+          teamSlug={team.slug}
+          days={days}
+          initialStatus={normalizedStatus}
+          initialSessionId={normalizedSessionId}
+        />
       </div>
     </div>
   );

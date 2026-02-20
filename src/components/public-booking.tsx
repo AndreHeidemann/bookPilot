@@ -11,9 +11,10 @@ interface PublicBookingProps {
   teamSlug: string;
   days: { date: string; slots: string[] }[];
   initialStatus?: "success" | "cancelled";
+  initialSessionId?: string;
 }
 
-export const PublicBooking = ({ teamName, teamSlug, days, initialStatus }: PublicBookingProps) => {
+export const PublicBooking = ({ teamName, teamSlug, days, initialStatus, initialSessionId }: PublicBookingProps) => {
   const [selectedDate, setSelectedDate] = useState(days[0]?.date ?? "");
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", email: "", phone: "" });
@@ -27,7 +28,12 @@ export const PublicBooking = ({ teamName, teamSlug, days, initialStatus }: Publi
     if (!initialStatus) return;
     setStep("confirmation");
     if (initialStatus === "success") {
-      setStatus({ success: true, message: "Deposit payment confirmed! See you at your booked time." });
+      setStatus({
+        success: true,
+        message: initialSessionId
+          ? "Confirming your deposit payment..."
+          : "Deposit payment confirmed! See you at your booked time.",
+      });
       return;
     }
     if (initialStatus === "cancelled") {
@@ -36,7 +42,46 @@ export const PublicBooking = ({ teamName, teamSlug, days, initialStatus }: Publi
         message: "Payment was cancelled. Your reservation is still pending until the deposit is paid.",
       });
     }
-  }, [initialStatus]);
+  }, [initialStatus, initialSessionId]);
+
+  useEffect(() => {
+    if (initialStatus !== "success" || !initialSessionId) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const confirmSession = async () => {
+      try {
+        const response = await fetch("/api/billing/checkout-session/confirm", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sessionId: initialSessionId }),
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.message ?? "Unable to confirm deposit payment");
+        }
+        if (!cancelled) {
+          setStatus({ success: true, message: "Deposit payment confirmed! See you at your booked time." });
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setStatus({
+            success: false,
+            message:
+              error instanceof Error ? error.message : "Unable to confirm your payment. Please contact the organizer.",
+          });
+        }
+      }
+    };
+
+    confirmSession();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [initialStatus, initialSessionId]);
 
   const handleCreate = async () => {
     if (!selectedSlot) return;
