@@ -237,6 +237,14 @@ export const PublicBooking = ({ teamName, teamSlug, days, initialStatus, initial
               Open payment link
             </a>
           ) : null}
+          {status.success && !status.checkoutUrl ? (
+            <a
+              className="inline-flex w-full items-center justify-center rounded-md border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              href="/login"
+            >
+              Go to login & manage bookings
+            </a>
+          ) : null}
           <Button variant="ghost" type="button" onClick={() => window.location.reload()}>
             Book another slot
           </Button>
