@@ -15,7 +15,7 @@ After logging in, explore the `/app` workspace, confirm/cancel bookings, or copy
 ## Run locally (optional)
 ```bash
 # clone and enter
-git clone <repo-url>
+git clone https://github.com/AndreHeidemann/bookPilot.git
 cd bookpilot
 
 # install deps
@@ -37,10 +37,10 @@ Visit http://localhost:3000 and sign in with the same demo credentials.
 - Check that paid bookings update the admin view and audit trail whether confirmed via webhook or the client-side fallback.
 
 ## Why reviewers care
-- **Purpose-built flows** – Authenticated `/app` workspace with a dashboard, bookings queue, weekly availability editor, and audit log, plus a public `/book/:teamSlug` guest flow.
-- **Modern stack** – Next.js 16 App Router, React 19 Server Components, Prisma 7 on SQLite via `better-sqlite3`, Tailwind 4, iron-session auth, and Stripe + Google Calendar integrations that gracefully fall back to demo mode when keys are missing.
-- **Operational safeguards** – Centralized config/validation, encrypted PII values at rest, pending payment expiry, idempotent mutations, audit logging, a Stripe checkout fallback that confirms bookings even if webhooks are delayed, and seed data that mirrors a real operator workflow.
-- **Tight DX** – Typed Prisma scripts, ESLint 9, Vitest, and a minimal seed database so anyone can clone, run, and evaluate the project in minutes.
+- **Real operator flow** – You can log in, triage bookings, tweak availability, and then jump into the `/book/:teamSlug` guest flow without leaving the repo.
+- **Pragmatic stack** – Next.js 16 server components, Prisma 7 on SQLite/libSQL, Tailwind, Stripe Checkout, and Google Calendar—nothing exotic, but all wired end to end.
+- **Safety nets** – Encrypted PII, pending-payment expiry, idempotent mutations, audit logging, and a Stripe confirmation fallback so paid bookings never get stuck.
+- **Low-friction DX** – Prisma scripts, ESLint, Vitest, and a tiny seed database keep the project easy to clone, inspect, and modify during review.
 
 ---
 
