@@ -107,7 +107,8 @@ Vercel's serverless runtime can't write to bundled SQLite files, so production n
 1. Provision a Turso/libSQL database and note its `libsql://...` URL plus auth token.
 2. Run Prisma migrations against it locally: `DATABASE_URL=<remote> DATABASE_AUTH_TOKEN=<token> npx prisma migrate deploy` (or `npm run db:migrate`). You can also rely on `TURSO_DATABASE_URL`/`TURSO_AUTH_TOKEN`; Prisma CLI now auto-detects them.
 3. Seed demo data if desired with `npm run db:seed` while the same env vars are set.
-4. Configure the same `DATABASE_URL`/`DATABASE_AUTH_TOKEN` (or rely on the `TURSO_*` variables Vercel injects) so every serverless function uses the remote database.
+4. In Vercel → Project Settings → Environment Variables, add **both** the URL and auth token (`DATABASE_URL` + `DATABASE_AUTH_TOKEN`, or `TURSO_DATABASE_URL` + `TURSO_AUTH_TOKEN`). Without them, Vercel falls back to the bundled `dev.db` and logging will show `[prisma] Using SQLite file at /var/task/dev.db`.
+5. Redeploy and confirm the logs say `[prisma] Using libSQL endpoint ...` before testing login.
 
 ---
 
