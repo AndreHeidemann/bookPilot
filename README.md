@@ -5,7 +5,7 @@ BookPilot is a scheduling and payments cockpit for internal operations teams. It
 ## Why reviewers care
 - **Purpose-built flows** – Authenticated `/app` workspace with a dashboard, bookings queue, weekly availability editor, and audit log, plus a public `/book/:teamSlug` guest flow.
 - **Modern stack** – Next.js 16 App Router, React 19 Server Components, Prisma 7 on SQLite via `better-sqlite3`, Tailwind 4, iron-session auth, and Stripe + Google Calendar integrations that gracefully fall back to demo mode when keys are missing.
-- **Operational safeguards** – Centralized config/validation, encrypted PII values at rest, pending payment expiry, idempotent mutations, audit logging, and seed data that mirrors a real operator workflow.
+- **Operational safeguards** – Centralized config/validation, encrypted PII values at rest, pending payment expiry, idempotent mutations, audit logging, a Stripe checkout fallback that confirms bookings even if webhooks are delayed, and seed data that mirrors a real operator workflow.
 - **Tight DX** – Typed Prisma scripts, ESLint 9, Vitest, and a minimal seed database so anyone can clone, run, and evaluate the project in minutes.
 
 ---
@@ -58,7 +58,7 @@ Leaving the Stripe fields empty keeps the UI in demo mode. To exercise real Chec
 - `STRIPE_SECRET_KEY`
 - `STRIPE_WEBHOOK_SECRET`
 - `STRIPE_PRICE_ID` (the deposit line item)
-Also update `DEPOSIT_AMOUNT_CENTS` if your deposit differs from the default `$50.00`.
+Also update `DEPOSIT_AMOUNT_CENTS` if your deposit differs from the default `$50.00`. When a live key is present BookPilot automatically appends `session_id` to the success redirect and polls `/api/billing/checkout-session/confirm`, so bookings still confirm if Vercel drops the webhook.
 
 ### 4. Google Calendar (optional in dev)
 Bookings automatically write to Google Calendar when these are set:
