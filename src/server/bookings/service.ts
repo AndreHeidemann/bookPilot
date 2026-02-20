@@ -1,6 +1,6 @@
 import { addDays, addMinutes, isBefore, startOfDay } from "date-fns";
 
-import { BookingStatus, Prisma } from "@prisma/client";
+import { BookingStatus, PaymentStatus, Prisma } from "@prisma/client";
 
 import { AppError } from "@/lib/errors";
 import { prisma } from "@/lib/prisma";
@@ -120,9 +120,15 @@ export const confirmBooking = async (bookingId: string, actorUserId: string) => 
   }
 
   if (isPendingExpired(booking)) {
-    await prisma.booking.update({
-      where: { id: booking.id },
-      data: { status: BookingStatus.CANCELLED, cancelledAt: new Date() },
+    await prisma.$transaction(async (tx) => {
+      await tx.booking.update({
+        where: { id: booking.id },
+        data: { status: BookingStatus.CANCELLED, cancelledAt: new Date() },
+      });
+      await tx.payment.updateMany({
+        where: { bookingId: booking.id },
+        data: { status: PaymentStatus.CANCELED },
+      });
     });
     throw new AppError("BOOKING_EXPIRED", "Deposit window expired", 409);
   }
@@ -184,6 +190,11 @@ export const cancelBooking = async (bookingId: string, actorUserId: string) => {
       cancelledAt: new Date(),
     },
     select: bookingSelect,
+  });
+
+  await prisma.payment.updateMany({
+    where: { bookingId: updated.id },
+    data: { status: PaymentStatus.CANCELED },
   });
 
   await logAudit({
@@ -268,17 +279,35 @@ const ensureSlotIsAvailable = async (
 
 const expirePendingPayments = async (teamId: string) => {
   const cutoff = pendingCutoffDate();
-  await prisma.booking.updateMany({
+  const expired = await prisma.booking.findMany({
     where: {
       teamId,
       status: BookingStatus.PENDING_PAYMENT,
       createdAt: { lt: cutoff },
     },
-    data: {
-      status: BookingStatus.CANCELLED,
-      cancelledAt: new Date(),
-    },
+    select: { id: true },
   });
+
+  if (expired.length === 0) {
+    return;
+  }
+
+  const expiredIds = expired.map((booking) => booking.id);
+  const cancelledAt = new Date();
+
+  await prisma.$transaction([
+    prisma.booking.updateMany({
+      where: { id: { in: expiredIds } },
+      data: {
+        status: BookingStatus.CANCELLED,
+        cancelledAt,
+      },
+    }),
+    prisma.payment.updateMany({
+      where: { bookingId: { in: expiredIds } },
+      data: { status: PaymentStatus.CANCELED },
+    }),
+  ]);
 };
 
 const ensureSlotMatchesAvailability = async (teamId: string, startAt: Date, endAt: Date) => {

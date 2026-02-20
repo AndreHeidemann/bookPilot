@@ -36,6 +36,10 @@ export const createDepositCheckoutSession = async ({
         where: { id: booking.id },
         data: { status: BookingStatus.CANCELLED, cancelledAt: new Date() },
       });
+      await tx.payment.updateMany({
+        where: { bookingId: booking.id },
+        data: { status: PaymentStatus.CANCELED },
+      });
       throw new AppError("BOOKING_EXPIRED", "Booking payment window expired", 409);
     }
 
