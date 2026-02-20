@@ -89,8 +89,8 @@ GOOGLE_CALENDAR_ID=""
 | Variable | Required | Purpose |
 | --- | --- | --- |
 | `APP_BASE_URL` | ✅ | Canonical URL used in emails, webhooks, and redirect URLs.
-| `DATABASE_URL` | ✅ | Prisma connection string (`file:./dev.db` locally, `libsql://...` when deploying).
-| `DATABASE_AUTH_TOKEN` | Optional | Auth token for remote libSQL/Turso deployments (not needed for local files).
+| `DATABASE_URL` | ✅ | Prisma connection string (`file:./dev.db` locally, `libsql://...` when deploying). Falls back to `TURSO_DATABASE_URL`/`LIBSQL_DATABASE_URL` if set.
+| `DATABASE_AUTH_TOKEN` | Optional | Auth token for remote libSQL/Turso deployments (falls back to `TURSO_AUTH_TOKEN`/`LIBSQL_AUTH_TOKEN`).
 | `SESSION_PASSWORD` | ✅ | Iron-session cookie password (32+ characters).
 | `ENCRYPTION_KEY` | ✅ | Base64-encoded 32-byte key used to encrypt guest PII columns.
 | `DEPOSIT_AMOUNT_CENTS` | ✅ | Stripe checkout deposit amount in cents.
@@ -105,9 +105,9 @@ GOOGLE_CALENDAR_ID=""
 ### Remote libSQL (Vercel) setup
 Vercel's serverless runtime can't write to bundled SQLite files, so production needs a remote libSQL database (Turso or any libSQL host).
 1. Provision a Turso/libSQL database and note its `libsql://...` URL plus auth token.
-2. Run Prisma migrations against it locally: `DATABASE_URL=<remote> DATABASE_AUTH_TOKEN=<token> npx prisma migrate deploy` (or `npm run db:migrate`).
+2. Run Prisma migrations against it locally: `DATABASE_URL=<remote> DATABASE_AUTH_TOKEN=<token> npx prisma migrate deploy` (or `npm run db:migrate`). You can also rely on `TURSO_DATABASE_URL`/`TURSO_AUTH_TOKEN`; Prisma CLI now auto-detects them.
 3. Seed demo data if desired with `npm run db:seed` while the same env vars are set.
-4. Configure the same `DATABASE_URL` and `DATABASE_AUTH_TOKEN` inside Vercel's Environment Variables so every serverless function uses the remote database.
+4. Configure the same `DATABASE_URL`/`DATABASE_AUTH_TOKEN` (or rely on the `TURSO_*` variables Vercel injects) so every serverless function uses the remote database.
 
 ---
 
