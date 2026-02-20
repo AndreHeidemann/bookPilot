@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,9 +10,10 @@ interface PublicBookingProps {
   teamName: string;
   teamSlug: string;
   days: { date: string; slots: string[] }[];
+  initialStatus?: "success" | "cancelled";
 }
 
-export const PublicBooking = ({ teamName, teamSlug, days }: PublicBookingProps) => {
+export const PublicBooking = ({ teamName, teamSlug, days, initialStatus }: PublicBookingProps) => {
   const [selectedDate, setSelectedDate] = useState(days[0]?.date ?? "");
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", email: "", phone: "" });
@@ -21,6 +22,21 @@ export const PublicBooking = ({ teamName, teamSlug, days }: PublicBookingProps) 
   const [loading, setLoading] = useState(false);
 
   const filteredSlots = useMemo(() => days.find((day) => day.date === selectedDate)?.slots ?? [], [days, selectedDate]);
+
+  useEffect(() => {
+    if (!initialStatus) return;
+    setStep("confirmation");
+    if (initialStatus === "success") {
+      setStatus({ success: true, message: "Deposit payment confirmed! See you at your booked time." });
+      return;
+    }
+    if (initialStatus === "cancelled") {
+      setStatus({
+        success: false,
+        message: "Payment was cancelled. Your reservation is still pending until the deposit is paid.",
+      });
+    }
+  }, [initialStatus]);
 
   const handleCreate = async () => {
     if (!selectedSlot) return;

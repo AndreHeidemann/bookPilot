@@ -7,8 +7,21 @@ import { AppError } from "@/lib/errors";
 
 export const dynamic = "force-dynamic";
 
-const PublicBookingPage = async ({ params }: { params: Promise<{ teamSlug: string }> }) => {
+const PublicBookingPage = async ({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ teamSlug: string }>;
+  searchParams?: Promise<{ status?: string }>;
+}) => {
   const resolvedParams = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const normalizedStatus =
+    resolvedSearchParams.status === "success"
+      ? "success"
+      : resolvedSearchParams.status === "cancelled"
+        ? "cancelled"
+        : undefined;
   let team;
   let days;
   try {
@@ -24,7 +37,7 @@ const PublicBookingPage = async ({ params }: { params: Promise<{ teamSlug: strin
   return (
     <div className="min-h-screen bg-white px-4 py-10">
       <div className="mx-auto max-w-3xl space-y-6">
-        <PublicBooking teamName={team.name} teamSlug={team.slug} days={days} />
+        <PublicBooking teamName={team.name} teamSlug={team.slug} days={days} initialStatus={normalizedStatus} />
       </div>
     </div>
   );
