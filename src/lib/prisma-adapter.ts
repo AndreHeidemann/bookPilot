@@ -5,12 +5,25 @@ import { PrismaLibSql } from "@prisma/adapter-libsql";
 
 export type PrismaAdapter = PrismaBetterSqlite3 | PrismaLibSql;
 
+const logPrisma = (message: string) => {
+  console.info(`[prisma] ${message}`);
+};
+
 const resolveDatabaseUrl = () =>
   process.env.DATABASE_URL ??
   process.env.TURSO_DATABASE_URL ??
   process.env.LIBSQL_DATABASE_URL ??
   process.env.LIBSQL_URL ??
   null;
+
+const describeRemoteUrl = (url: string) => {
+  try {
+    const parsed = new URL(url);
+    return `${parsed.protocol}//${parsed.host}`;
+  } catch {
+    return url;
+  }
+};
 
 export const buildPrismaAdapter = (): PrismaAdapter => {
   const url = resolveDatabaseUrl();
@@ -22,6 +35,7 @@ export const buildPrismaAdapter = (): PrismaAdapter => {
   if (isFileUrl) {
     const filePath = url.startsWith("file:") ? url.replace("file:", "") : url;
     const resolvedPath = filePath.startsWith("/") ? filePath : path.resolve(process.cwd(), filePath);
+    logPrisma(`Using SQLite file at ${resolvedPath}`);
     return new PrismaBetterSqlite3({ url: `file:${resolvedPath}` });
   }
 
@@ -31,5 +45,6 @@ export const buildPrismaAdapter = (): PrismaAdapter => {
     throw new Error("DATABASE_AUTH_TOKEN (or TURSO_AUTH_TOKEN) is required for libsql:// connections");
   }
 
+  logPrisma(`Using libSQL endpoint ${describeRemoteUrl(url)}`);
   return new PrismaLibSql({ url, authToken });
 };
