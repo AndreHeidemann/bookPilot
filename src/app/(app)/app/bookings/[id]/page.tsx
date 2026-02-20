@@ -9,6 +9,8 @@ import { getTeamBooking } from "@/server/bookings/service";
 import { getBookingAuditTrail } from "@/server/audit/service";
 import { AppError } from "@/lib/errors";
 
+export const dynamic = "force-dynamic";
+
 type BookingAuditLogs = Awaited<ReturnType<typeof getBookingAuditTrail>>;
 type BookingAuditLog = BookingAuditLogs[number];
 
