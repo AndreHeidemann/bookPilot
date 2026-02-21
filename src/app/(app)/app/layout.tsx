@@ -3,6 +3,9 @@ import { AppNav } from "@/components/app-nav";
 import { UserMenu } from "@/components/user-menu";
 import { getCurrentUserOrRedirect } from "@/server/auth/service";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const AppLayout = async ({ children }: { children: ReactNode }) => {
   const user = await getCurrentUserOrRedirect();
 

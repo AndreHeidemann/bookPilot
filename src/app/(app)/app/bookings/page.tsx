@@ -3,6 +3,7 @@ import { getCurrentUserOrRedirect } from "@/server/auth/service";
 import { listTeamBookings } from "@/server/bookings/service";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 type BookingListItem = Awaited<ReturnType<typeof listTeamBookings>>[number];
 
