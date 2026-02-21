@@ -84,7 +84,11 @@ export const BookingsTable = ({ initialBookings }: { initialBookings: BookingIte
                   <div className="text-xs text-slate-400">{booking.customerPhone}</div>
                 </td>
                 <td className="px-4 py-3">
-                  <Link href={`/app/bookings/${booking.id}`} className="text-sm font-medium text-blue-600">
+                  <Link
+                    href={`/app/bookings/${booking.id}`}
+                    prefetch={false}
+                    className="text-sm font-medium text-blue-600"
+                  >
                     View
                   </Link>
                 </td>
