@@ -1,3 +1,4 @@
+import { unstable_noStore as noStore } from "next/cache";
 import { ReactNode } from "react";
 import { AppNav } from "@/components/app-nav";
 import { UserMenu } from "@/components/user-menu";
@@ -7,6 +8,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 const AppLayout = async ({ children }: { children: ReactNode }) => {
+  noStore();
   const user = await getCurrentUserOrRedirect();
 
   return (

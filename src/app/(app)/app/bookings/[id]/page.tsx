@@ -1,3 +1,4 @@
+import { unstable_noStore as noStore } from "next/cache";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -16,6 +17,7 @@ type BookingAuditLogs = Awaited<ReturnType<typeof getBookingAuditTrail>>;
 type BookingAuditLog = BookingAuditLogs[number];
 
 const BookingDetailPage = async ({ params }: { params: { id: string } }) => {
+  noStore();
   const user = await getCurrentUserOrRedirect();
   try {
     const booking = await getTeamBooking(user.teamId, params.id);

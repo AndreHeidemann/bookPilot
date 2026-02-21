@@ -1,3 +1,5 @@
+import { unstable_noStore as noStore } from "next/cache";
+
 import { BookingsTable } from "@/components/bookings-table";
 import { getCurrentUserOrRedirect } from "@/server/auth/service";
 import { listTeamBookings } from "@/server/bookings/service";
@@ -8,6 +10,7 @@ export const revalidate = 0;
 type BookingListItem = Awaited<ReturnType<typeof listTeamBookings>>[number];
 
 const BookingsPage = async () => {
+  noStore();
   const user = await getCurrentUserOrRedirect();
   const bookings: BookingListItem[] = await listTeamBookings(user.teamId);
   return (
