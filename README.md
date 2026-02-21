@@ -182,26 +182,5 @@ prisma/
   seed.ts                      → deterministic local dataset
 ```
 
----
 
-## Portfolio commit story
-You can explore the actual history with:
-```bash
-git log --reverse --decorate --stat
-```
-Curated checkpoints worth reading:
 
-| Commit | Story |
-| --- | --- |
-| `5847ffe` | Scaffolded the Next.js 16 + TypeScript baseline (`create-next-app`), wired ESLint/Tailwind, and left the project ready for custom code.
-| `809eefa` | Documented the initial product brief and runbook so reviewers know what problem BookPilot solves before digging into the code.
-| `WORKTREE` | Adds the scheduling, payments, and integrations stack you are reviewing now (see the diff in your clone).
-
-Future commits will continue to be narrowly scoped so reviewers can follow how features evolve.
-
----
-
-## Suggested next steps
-1. Capture screenshots or a Loom walkthrough so readers can see the UX without running the repo.
-2. Publish a deployment recipe (Railway, Fly.io, Vercel + Neon) that references this README.
-3. Expand the Vitest suite to cover Stripe webhook handling and booking conflict detection.
